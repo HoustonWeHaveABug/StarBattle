@@ -210,7 +210,7 @@ void star_battle(void) {
 			if (!cell_is_candidate || (empty_cell_allowed(cell->region_group) && empty_cell_allowed(cell->row_group) && empty_cell_allowed(cell->column_group))) {
 				cell->options[cell->options_n++] = SYMBOL_EMPTY;
 			}
-			if (cell->options_n < cell_min->options_n || (cell->options_n == cell_min->options_n && cell->region_group->candidates_n+cell->row_group->candidates_n+cell->column_group->candidates_n < cell_min->region_group->candidates_n+cell_min->row_group->candidates_n+cell_min->column_group->candidates_n)) {
+			if (cell->options_n < cell_min->options_n || (cell->options_n == cell_min->options_n && cell->region_group->stars_n+cell->row_group->stars_n+cell->column_group->stars_n+cell->region_group->candidates_n+cell->row_group->candidates_n+cell->column_group->candidates_n < cell_min->region_group->stars_n+cell_min->row_group->stars_n+cell_min->column_group->stars_n+cell_min->region_group->candidates_n+cell_min->row_group->candidates_n+cell_min->column_group->candidates_n)) {
 				cell_min = cell;
 			}
 		}
