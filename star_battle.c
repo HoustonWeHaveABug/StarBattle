@@ -33,9 +33,9 @@ void set_cell(cell_t *, group_t *, group_t *, group_t *, int);
 void chain_cell(cell_t *, cell_t *, cell_t *);
 void star_battle(void);
 int empty_cell_allowed(group_t *);
-void test_dec_candidates(cell_t *);
+int test_dec_candidates(cell_t *);
 void dec_candidates(cell_t *);
-void test_inc_candidates(cell_t *);
+void test_inc_candidates(int, cell_t *);
 void inc_candidates(cell_t *);
 int is_candidate(cell_t *);
 
@@ -142,7 +142,7 @@ int main(void) {
 		groups[groups_idx].candidates_n = 0;
 	}
 	for (cell = header->next; cell != header; cell = cell->next) {
-		test_inc_candidates(cell);
+		inc_candidates(cell);
 	}
 	star_battle();
 	printf("Nodes %d\nSolutions %d\n", nodes_n, solutions_n);
@@ -220,16 +220,16 @@ void star_battle(void) {
 		cell_min->last->next = cell_min->next;
 		cell_min->next->last = cell_min->last;
 		for (options_idx = 0; options_idx < cell_min->options_n; options_idx++) {
-			test_dec_candidates(cell_min);
+			int is_cell_candidate = test_dec_candidates(cell_min), is_cell_w_candidate = 0, is_cell_wn_candidate = 0, is_cell_n_candidate = 0, is_cell_ne_candidate = 0, is_cell_e_candidate = 0, is_cell_es_candidate = 0, is_cell_s_candidate = 0, is_cell_sw_candidate = 0;
 			if (cell_min->options[options_idx] == SYMBOL_STAR) {
-				test_dec_candidates(cell_min-1);
-				test_dec_candidates(cell_min-side-1);
-				test_dec_candidates(cell_min-side);
-				test_dec_candidates(cell_min-side+1);
-				test_dec_candidates(cell_min+1);
-				test_dec_candidates(cell_min+side+1);
-				test_dec_candidates(cell_min+side);
-				test_dec_candidates(cell_min+side-1);
+				is_cell_w_candidate = test_dec_candidates(cell_min-1);
+				is_cell_wn_candidate = test_dec_candidates(cell_min-side-1);
+				is_cell_n_candidate = test_dec_candidates(cell_min-side);
+				is_cell_ne_candidate = test_dec_candidates(cell_min-side+1);
+				is_cell_e_candidate = test_dec_candidates(cell_min+1);
+				is_cell_es_candidate = test_dec_candidates(cell_min+side+1);
+				is_cell_s_candidate = test_dec_candidates(cell_min+side);
+				is_cell_sw_candidate = test_dec_candidates(cell_min+side-1);
 				cell_min->region_group->stars_n++;
 				cell_min->row_group->stars_n++;
 				cell_min->column_group->stars_n++;
@@ -241,16 +241,16 @@ void star_battle(void) {
 				cell_min->column_group->stars_n--;
 				cell_min->row_group->stars_n--;
 				cell_min->region_group->stars_n--;
-				test_inc_candidates(cell_min+side-1);
-				test_inc_candidates(cell_min+side);
-				test_inc_candidates(cell_min+side+1);
-				test_inc_candidates(cell_min+1);
-				test_inc_candidates(cell_min-side+1);
-				test_inc_candidates(cell_min-side);
-				test_inc_candidates(cell_min-side-1);
-				test_inc_candidates(cell_min-1);
+				test_inc_candidates(is_cell_sw_candidate, cell_min+side-1);
+				test_inc_candidates(is_cell_s_candidate, cell_min+side);
+				test_inc_candidates(is_cell_es_candidate, cell_min+side+1);
+				test_inc_candidates(is_cell_e_candidate, cell_min+1);
+				test_inc_candidates(is_cell_ne_candidate, cell_min-side+1);
+				test_inc_candidates(is_cell_n_candidate, cell_min-side);
+				test_inc_candidates(is_cell_wn_candidate, cell_min-side-1);
+				test_inc_candidates(is_cell_w_candidate, cell_min-1);
 			}
-			test_inc_candidates(cell_min);
+			test_inc_candidates(is_cell_candidate, cell_min);
 		}
 		cell_min->next->last = cell_min;
 		cell_min->last->next = cell_min;
@@ -261,10 +261,12 @@ int empty_cell_allowed(group_t *group) {
 	return group->stars_n+group->candidates_n > stars_n;
 }
 
-void test_dec_candidates(cell_t *cell) {
-	if (is_candidate(cell)) {
+int test_dec_candidates(cell_t *cell) {
+	int is_cell_candidate = is_candidate(cell);
+	if (is_cell_candidate) {
 		dec_candidates(cell);
 	}
+	return is_cell_candidate;
 }
 
 void dec_candidates(cell_t *cell) {
@@ -273,8 +275,8 @@ void dec_candidates(cell_t *cell) {
 	cell->column_group->candidates_n--;
 }
 
-void test_inc_candidates(cell_t *cell) {
-	if (is_candidate(cell)) {
+void test_inc_candidates(int is_cell_candidate, cell_t *cell) {
+	if (is_cell_candidate) {
 		inc_candidates(cell);
 	}
 }
