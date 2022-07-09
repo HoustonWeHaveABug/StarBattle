@@ -4,7 +4,6 @@
 #include <limits.h>
 
 #define OPTIONS_MAX 2
-#define EMPTY_ALLOWED_SIZE 3
 #define GROUP_TYPES_N 3
 #define SYMBOL_EOL '\n'
 #define SYMBOL_STAR '*'
@@ -28,7 +27,7 @@ struct cell_s {
 	int options_n;
 	int options[OPTIONS_MAX];
 	int symbol;
-	int empty_allowed[EMPTY_ALLOWED_SIZE];
+	int empty_allowed[GROUP_TYPES_N];
 	cell_t *last;
 	cell_t *next;
 };
@@ -55,7 +54,7 @@ cell_t *cells, **locked_cells, *header;
 
 int main(int argc, char *argv[]) {
 	char *end;
-	int groups_n, groups_idx, cells_n, region_groups_n, row, column;
+	int groups_n, groups_idx, cells_n, region_groups_n, column, row;
 	group_t *groups;
 	cell_t *cell;
 	if (argc > 2) {
@@ -199,12 +198,13 @@ void chain_cell(cell_t *cell, cell_t *last, cell_t *next) {
 }
 
 void star_battle(int locked_cells_sum) {
-	int changes_n, options_min, locked_cells_n = 0;
+	int locked_cells_n, changes_n, options_min;
 	cell_t *cell;
 	nodes_n = sum_with_limit(nodes_n, 1);
 	if (solutions_n == solutions_max) {
 		return;
 	}
+	locked_cells_n = 0;
 	do {
 		changes_n = 0;
 		options_min = OPTIONS_MAX;
@@ -218,10 +218,10 @@ void star_battle(int locked_cells_sum) {
 					cell->options[cell->options_n++] = SYMBOL_EMPTY;
 				}
 				if (cell->options_n == 1) {
-					changes_n++;
 					lock_cell(cell, cell->options[0]);
 					locked_cells[locked_cells_sum+locked_cells_n] = cell;
 					locked_cells_n++;
+					changes_n++;
 				}
 			}
 			if (cell->options_n < options_min) {
@@ -321,7 +321,7 @@ void set_empty_allowed(cell_t *cell) {
 	cell->empty_allowed[0] = get_empty_allowed(cell->region_group);
 	cell->empty_allowed[1] = get_empty_allowed(cell->row_group);
 	cell->empty_allowed[2] = get_empty_allowed(cell->column_group);
-	qsort(cell->empty_allowed, (size_t)EMPTY_ALLOWED_SIZE, sizeof(int), compare_ints);
+	qsort(cell->empty_allowed, (size_t)GROUP_TYPES_N, sizeof(int), compare_ints);
 }
 
 int compare_ints(const void *a, const void *b) {
